@@ -1,5 +1,7 @@
 from pycoingecko import CoinGeckoAPI
 
+from ticker.utils import fetch_logo
+
 cg = CoinGeckoAPI()
 
 
@@ -12,7 +14,7 @@ def get_crypto_info(ids):
         price = coin["current_price"]
         change = coin["price_change_24h"]
         percent = coin["price_change_percentage_24h"]
-        logo_url = coin.get("image")
+        logo_url = fetch_logo(name, coin.get("image"))
         symbol = coin["symbol"].upper()
         result[symbol] = {
             "name": name,

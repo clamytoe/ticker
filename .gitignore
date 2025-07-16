@@ -111,3 +111,6 @@ ENV/
 
 # env file
 .env
+
+# local cache directory
+logo_cache/

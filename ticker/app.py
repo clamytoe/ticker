@@ -10,7 +10,7 @@ import wx
 
 from ticker.crypto import get_crypto_info
 from ticker.stock import get_stock_info
-from ticker.utils import url_to_wx_bitmap
+from ticker.utils import get_logo_bitmap
 
 STOCKS = [
     "ALAB",
@@ -84,8 +84,8 @@ class TickerPanel(wx.Panel):
         dc.Clear()
 
         # Logo or ticker symbol
-        if info.get("logo_url") and info["logo_url"].startswith("http"):
-            icon_bmp = url_to_wx_bitmap(info["logo_url"], size=(48, 48))
+        if info.get("logo_url") and info["logo_url"].startswith("logo_cache"):
+            icon_bmp = get_logo_bitmap(info["logo_url"])
             dc.DrawBitmap(icon_bmp, 5, (height - 48) // 2, True)
         else:
             # Draw symbol
@@ -159,12 +159,9 @@ class TickerPanel(wx.Panel):
 
 class MainFrame(wx.Frame):
     def __init__(self, stock_data):
-        style = (
-            wx.STAY_ON_TOP
-            | wx.BORDER_NONE  # No border, no title bar, no frame decorations
-        )
+        style = wx.STAY_ON_TOP | wx.BORDER_NONE
         height = 120
-        wx.Frame.__init__(self, None, title="Stock & Crypto Ticker", style=style)
+        super().__init__(None, title="Stock & Crypto Ticker", style=style)  # FIXED
         self.SetSize((wx.DisplaySize()[0], height))  # type: ignore
         self.SetPosition((0, wx.DisplaySize()[1] - height))  # type: ignore
 
@@ -174,9 +171,12 @@ class MainFrame(wx.Frame):
         sizer.Add(self.ticker, 1, wx.EXPAND)
         panel.SetSizer(sizer)
 
-        # To handle hotkey or other close events
         self.Bind(wx.EVT_CHAR_HOOK, self.on_hotkey)
         self.Show()
+
+        self.refresh_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_refresh_timer, self.refresh_timer)
+        self.refresh_timer.Start(60000)  # 60,000 ms = 1 minute
 
     def on_hotkey(self, event):
         keycode = event.GetKeyCode()
@@ -186,6 +186,19 @@ class MainFrame(wx.Frame):
             self.Close()
         else:
             event.Skip()
+
+    def on_refresh_timer(self, event):
+        # Run async function synchronously
+        new_data = asyncio.run(gather_all_data_async())
+        self.ticker.all_data = list(new_data.values())
+        self.ticker.ticker_items = self.ticker.prepare_ticker_items()
+        self.ticker.Refresh()
+
+    async def refresh_data(self):
+        new_data = await gather_all_data_async()
+        self.ticker.all_data = list(new_data.values())
+        self.ticker.ticker_items = self.ticker.prepare_ticker_items()
+        self.ticker.Refresh()
 
 
 async def async_get_stock_info(ticker, loop=None):

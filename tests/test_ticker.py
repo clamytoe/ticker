@@ -1,17 +1,29 @@
-"""
-test_ticker.py
+from unittest.mock import patch
 
-Tests for ticker.
-"""
-from os import environ
-from dotenv import load_dotenv
-from ticker import __version__
+from ticker.crypto import get_crypto_info
 
 
-def test_version():
-    assert __version__ == '0.1.0'
+@patch("ticker.crypto.cg.get_coins_markets")
+@patch("ticker.crypto.fetch_logo", return_value="http://logo.url")
+def test_get_crypto_info_basic(mock_logo, mock_markets):
+    mock_markets.return_value = [
+        {
+            "name": "Bitcoin",
+            "current_price": 120000,
+            "price_change_24h": 1000,
+            "price_change_percentage_24h": 1.7,
+            "image": "http://image.url",
+            "symbol": "btc",
+        }
+    ]
+    result = get_crypto_info(["bitcoin"])
+    assert "BTC" in result
+    assert result["BTC"]["name"] == "Bitcoin"
+    assert result["BTC"]["price"] == 120000
+    assert result["BTC"]["logo_url"] == "http://logo.url"
 
 
-def test_env():
-    load_dotenv()
-    assert environ.get("TEST_VALUE") == "clamytoe"
+@patch("ticker.crypto.cg.get_coins_markets", return_value=[])
+def test_get_crypto_info_empty(mock_markets):
+    result = get_crypto_info([])
+    assert result == {}

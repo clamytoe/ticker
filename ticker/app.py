@@ -89,13 +89,12 @@ class TickerPanel(wx.Panel):
             dc.DrawBitmap(icon_bmp, 5, (height - 48) // 2, True)
         else:
             # Draw symbol
-            # dc.SetBrush(wx.Brush(wx.Colour(50, 50, 50)))
             dc.SetBrush(wx.Brush(wx.Colour(0, 0, 0)))
             dc.SetPen(wx.TRANSPARENT_PEN)
             rect = wx.Rect(5, (height - 48) // 2, 48, 48)
             dc.DrawRectangle(rect)
             dc.SetTextForeground(wx.WHITE)
-            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)  # type: ignore
             dc.SetFont(font)
             ticker = info.get("symbol", "")
             tw, th = dc.GetTextExtent(ticker)
@@ -107,7 +106,7 @@ class TickerPanel(wx.Panel):
 
         # Stock/Crypto name (top)
         dc.SetTextForeground(wx.WHITE)
-        dc.SetFont(wx.Font(11, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        dc.SetFont(wx.Font(11, wx.DEFAULT, wx.NORMAL, wx.BOLD))  # type: ignore
         name = info.get("name", "")
         dc.DrawText(name, 60, 16)
 
@@ -120,7 +119,7 @@ class TickerPanel(wx.Panel):
         perc = info.get("percent", 0)
         color = wx.Colour(0, 210, 0) if chg >= 0 else wx.Colour(230, 0, 0)
         dc.SetTextForeground(wx.WHITE)
-        dc.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
+        dc.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))  # type: ignore
         xoff = 60
         s1 = f"${price:,.2f} "
         tw, th = dc.GetTextExtent(s1)
@@ -149,9 +148,6 @@ class TickerPanel(wx.Panel):
         y = (h - self.ticker_height) // 2
 
         # Scroll right-to-left
-        # total_width = sum(
-        #     bmp.GetWidth() + self.ticker_spacing for bmp in self.ticker_items
-        # )
         x = -self.scroll_x
         i = 0
         while x < w:
@@ -159,7 +155,6 @@ class TickerPanel(wx.Panel):
             gc.DrawBitmap(bmp, x, y, bmp.GetWidth(), bmp.GetHeight())
             x += bmp.GetWidth() + self.ticker_spacing
             i += 1
-        # (not using background blur for simplicity)
 
 
 class MainFrame(wx.Frame):
@@ -170,8 +165,8 @@ class MainFrame(wx.Frame):
         )
         height = 120
         wx.Frame.__init__(self, None, title="Stock & Crypto Ticker", style=style)
-        self.SetSize((wx.DisplaySize()[0], height))
-        self.SetPosition((0, wx.DisplaySize()[1] - height))
+        self.SetSize((wx.DisplaySize()[0], height))  # type: ignore
+        self.SetPosition((0, wx.DisplaySize()[1] - height))  # type: ignore
 
         panel = wx.Panel(self)
         self.ticker = TickerPanel(panel, stock_data)
@@ -191,33 +186,6 @@ class MainFrame(wx.Frame):
             self.Close()
         else:
             event.Skip()
-
-
-def gather_all_data():
-    all_data = {}
-
-    # Gather stock data
-    for symbol in STOCKS:
-        try:
-            info = get_stock_info(symbol)
-            if info:  # Only add if retrieval was successful
-                all_data[symbol] = info
-        except Exception as e:
-            print(f"Error getting stock info for {symbol}: {e}")
-
-    # Gather crypto data (batched for efficiency)
-    try:
-        crypto_data = get_crypto_info(CRYPTO)
-        for cg_id, info in zip(
-            CRYPTO, [crypto_data.get(CRYPTO_KEYMAP[cg_id], None) for cg_id in CRYPTO]
-        ):
-            if info:
-                display_symbol = CRYPTO_KEYMAP[cg_id]  # BTC, ETH, etc.
-                all_data[display_symbol] = info
-    except Exception as e:
-        print(f"Error getting crypto info: {e}")
-
-    return all_data
 
 
 async def async_get_stock_info(ticker, loop=None):
@@ -253,7 +221,7 @@ async def gather_all_data_async():
 def main():
     data = asyncio.run(gather_all_data_async())
     app = wx.App(False)
-    frame = MainFrame(data)
+    _ = MainFrame(data)
     app.MainLoop()
 
 

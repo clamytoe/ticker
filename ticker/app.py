@@ -44,50 +44,122 @@ CRYPTO = list(CRYPTO_KEYMAP)
 
 
 class TickerPanel(wx.Panel):
-    def __init__(self, parent, data):
-        super().__init__(parent)
+    def __init__(self, parent, all_data, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
         self.SetBackgroundColour(wx.BLACK)
-        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.SetSizer(self.sizer)
-        self.update(data)
+        self.all_data = list(all_data.values())
+        self.scroll_x = 0
+        self.ticker_height = 80
+        self.ticker_spacing = 40
+        self.ticker_items = self.prepare_ticker_items()
+        self.scroll_speed = 2  # pixels per timer tick
 
-    def format_stock_display(self, info):
-        pnl = wx.Panel(self)
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-        # Logo
-        bmp = (
-            url_to_wx_bitmap(info["logo_url"])
-            if info["logo_url"]
-            else wx.Bitmap(48, 48)
-        )
-        logo = wx.StaticBitmap(pnl, bitmap=bmp)
-        sizer.Add(logo, 0, wx.ALL, 2)
-        # Text block
-        textsizer = wx.BoxSizer(wx.VERTICAL)
-        stock_name = wx.StaticText(pnl, label=info["name"])
-        stock_name.SetForegroundColour(wx.WHITE)
-        textsizer.Add(stock_name)
-        # Line 2: Price, arrow, change
+        # Start timer
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        self.timer.Start(20)  # 50 fps
+
+        self.Bind(wx.EVT_PAINT, self.on_paint)
+        self.Bind(wx.EVT_SIZE, lambda e: self.Refresh())
+
+    def prepare_ticker_items(self):
+        """
+        Prepare the info needed to render each ticker entry as a GDI+ bitmap.
+        Pre-rendering is optional, but speeds up paint.
+        """
+        rendered_items = []
+        for info in self.all_data:
+            bmp = self.render_ticker_item(info)
+            rendered_items.append(bmp)
+        return rendered_items
+
+    def render_ticker_item(self, info):
+        """
+        Render a single ticker entry to a wx.Bitmap and return it.
+        """
+        width = 300  # Arbitrary width, adjust as needed
+        height = self.ticker_height
+        bmp = wx.Bitmap(width, height)
+        dc = wx.MemoryDC(bmp)
+        dc.SetBackground(wx.Brush(wx.BLACK))
+        dc.Clear()
+
+        # Logo or ticker symbol
+        if info.get("logo_url") and info["logo_url"].startswith("http"):
+            icon_bmp = url_to_wx_bitmap(info["logo_url"], size=(48, 48))
+            dc.DrawBitmap(icon_bmp, 5, (height - 48) // 2, True)
+        else:
+            # Draw symbol
+            dc.SetBrush(wx.Brush(wx.Colour(50, 50, 50)))
+            dc.SetPen(wx.TRANSPARENT_PEN)
+            rect = wx.Rect(5, (height - 48) // 2, 48, 48)
+            dc.DrawRectangle(rect)
+            dc.SetTextForeground(wx.WHITE)
+            font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+            dc.SetFont(font)
+            ticker = info.get("symbol", "")
+            tw, th = dc.GetTextExtent(ticker)
+            dc.DrawText(
+                ticker,
+                rect.x + (rect.width - tw) // 2,
+                rect.y + (rect.height - th) // 2,
+            )
+
+        # Stock/Crypto name (top)
+        dc.SetTextForeground(wx.WHITE)
+        dc.SetFont(wx.Font(11, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        name = info.get("name", "")
+        dc.DrawText(name, 60, 16)
+
+        # Price and change (bottom)
+        price = info.get("price", 0)
         up = "\u25b2"
         down = "\u25bc"
-        symbol_arrow = up if info["change"] >= 0 else down
-        color = wx.Colour(0, 200, 0) if info["change"] >= 0 else wx.Colour(200, 0, 0)
-        line2 = wx.StaticText(
-            pnl,
-            label=f"${info['price']:.2f} {symbol_arrow} {info['change']:+.2f} ({info['percent']:+.2f}%)",
-        )
-        line2.SetForegroundColour(color)
-        textsizer.Add(line2)
-        sizer.Add(textsizer)
-        pnl.SetSizer(sizer)
-        return pnl
+        arrow = up if info.get("change", 0) >= 0 else down
+        chg = info.get("change", 0)
+        perc = info.get("percent", 0)
+        color = wx.Colour(0, 210, 0) if chg >= 0 else wx.Colour(230, 0, 0)
+        dc.SetTextForeground(wx.WHITE)
+        dc.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
+        xoff = 60
+        s1 = f"${price:,.2f} "
+        tw, th = dc.GetTextExtent(s1)
+        dc.DrawText(s1, xoff, 40)
+        xoff += tw
+        dc.SetTextForeground(color)
+        dc.DrawText(arrow, xoff, 40)
+        xoff += dc.GetTextExtent(arrow)[0] + 3
+        dc.DrawText(f"{chg:+.2f}", xoff, 40)
+        xoff += dc.GetTextExtent(f"{chg:+.2f}")[0] + 5
+        dc.DrawText(f"({perc:+.2f}%)", xoff, 40)
+        del dc
+        return bmp
 
-    def update(self, all_data):
-        self.sizer.Clear(True)
-        for _, info in all_data.items():
-            pnl = self.format_stock_display(info)
-            self.sizer.Add(pnl, 0, wx.ALL, 10)
-        self.Layout()
+    def on_timer(self, evt):
+        total_width = sum(
+            bmp.GetWidth() + self.ticker_spacing for bmp in self.ticker_items
+        )
+        self.scroll_x = (self.scroll_x + self.scroll_speed) % total_width
+        self.Refresh(False)
+
+    def on_paint(self, evt):
+        dc = wx.PaintDC(self)
+        gc = wx.GraphicsContext.Create(dc)
+        w, h = self.GetSize()
+        y = (h - self.ticker_height) // 2
+
+        # Scroll right-to-left
+        # total_width = sum(
+        #     bmp.GetWidth() + self.ticker_spacing for bmp in self.ticker_items
+        # )
+        x = -self.scroll_x
+        i = 0
+        while x < w:
+            bmp = self.ticker_items[i % len(self.ticker_items)]
+            gc.DrawBitmap(bmp, x, y, bmp.GetWidth(), bmp.GetHeight())
+            x += bmp.GetWidth() + self.ticker_spacing
+            i += 1
+        # (not using background blur for simplicity)
 
 
 class MainFrame(wx.Frame):
@@ -97,13 +169,13 @@ class MainFrame(wx.Frame):
             title="Stock and Crypto Ticker",
             style=wx.STAY_ON_TOP | wx.FRAME_NO_TASKBAR,
         )
-        self.SetSize((wx.DisplaySize()[0], 120))  # width of screen, height for ticker
-        self.SetPosition((0, wx.DisplaySize()[1] - 120))
+        height = 120
+        self.SetSize((wx.DisplaySize()[0], height))
+        self.SetPosition((0, wx.DisplaySize()[1] - height))
         panel = wx.Panel(self)
         self.ticker = TickerPanel(panel, stock_data)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.AddStretchSpacer()
-        sizer.Add(self.ticker, 0, wx.EXPAND)
+        sizer.Add(self.ticker, 1, wx.EXPAND)
         panel.SetSizer(sizer)
         self.Show()
 

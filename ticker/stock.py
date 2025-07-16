@@ -12,7 +12,7 @@ def get_stock_info(ticker):
     return {
         "name": name,
         "price": price,
-        "change": f"{change:.6f}",
-        "percent": f"{percent:.6f}",
+        "change": change,
+        "percent": percent,
         "logo_url": info.get("logo_url", f"{ticker.upper()}"),
     }

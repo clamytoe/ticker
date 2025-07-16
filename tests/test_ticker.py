@@ -1,5 +1,7 @@
 from unittest.mock import patch
 
+import wx
+
 from ticker.crypto import get_crypto_info
 
 
@@ -27,3 +29,19 @@ def test_get_crypto_info_basic(mock_logo, mock_markets):
 def test_get_crypto_info_empty(mock_markets):
     result = get_crypto_info([])
     assert result == {}
+
+
+def test_main_runs(monkeypatch):
+    async def fake_gather():
+        return {}
+
+    monkeypatch.setattr("ticker.app.gather_all_data_async", fake_gather)
+
+    class DummyApp(wx.App):
+        def MainLoop(self):
+            pass
+
+    monkeypatch.setattr("ticker.app.wx.App", lambda x: DummyApp())
+    from ticker.app import main
+
+    main()

@@ -89,12 +89,13 @@ class TickerPanel(wx.Panel):
             dc.DrawBitmap(icon_bmp, 5, (height - 48) // 2, True)
         else:
             # Draw symbol
-            dc.SetBrush(wx.Brush(wx.Colour(50, 50, 50)))
+            # dc.SetBrush(wx.Brush(wx.Colour(50, 50, 50)))
+            dc.SetBrush(wx.Brush(wx.Colour(0, 0, 0)))
             dc.SetPen(wx.TRANSPARENT_PEN)
             rect = wx.Rect(5, (height - 48) // 2, 48, 48)
             dc.DrawRectangle(rect)
             dc.SetTextForeground(wx.WHITE)
-            font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
             dc.SetFont(font)
             ticker = info.get("symbol", "")
             tw, th = dc.GetTextExtent(ticker)
@@ -163,32 +164,33 @@ class TickerPanel(wx.Panel):
 
 class MainFrame(wx.Frame):
     def __init__(self, stock_data):
-        super().__init__(
-            None,
-            title="Stock and Crypto Ticker",
-            style=wx.STAY_ON_TOP | wx.FRAME_NO_TASKBAR,
+        style = (
+            wx.STAY_ON_TOP
+            | wx.BORDER_NONE  # No border, no title bar, no frame decorations
         )
         height = 120
+        wx.Frame.__init__(self, None, title="Stock & Crypto Ticker", style=style)
         self.SetSize((wx.DisplaySize()[0], height))
         self.SetPosition((0, wx.DisplaySize()[1] - height))
+
         panel = wx.Panel(self)
         self.ticker = TickerPanel(panel, stock_data)
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.ticker, 1, wx.EXPAND)
         panel.SetSizer(sizer)
-        self.Bind(wx.EVT_CHAR_HOOK, self.on_hotkey)  # Bind here
+
+        # To handle hotkey or other close events
+        self.Bind(wx.EVT_CHAR_HOOK, self.on_hotkey)
         self.Show()
 
     def on_hotkey(self, event):
         keycode = event.GetKeyCode()
         ctrl = event.CmdDown() or event.ControlDown()
         shift = event.ShiftDown()
-
-        # Check for Ctrl+Shift+C
         if ctrl and shift and (keycode == ord("C") or keycode == ord("c")):
-            self.Close()  # Gracefully close the frame
+            self.Close()
         else:
-            event.Skip()  # Pass other keys onward
+            event.Skip()
 
 
 def gather_all_data():

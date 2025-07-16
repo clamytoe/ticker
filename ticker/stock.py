@@ -6,7 +6,7 @@ from ticker.utils import has_clearbit_logo
 def get_stock_info(ticker):
     t = yf.Ticker(ticker)
     info = t.info
-    price = info.get("regularMarketPrice")
+    price = info.get("regularMarketPrice", "0.00")
     prev_close = info.get("regularMarketPreviousClose", price)
     change = price - prev_close
     percent = (change / prev_close) * 100 if prev_close else 0

@@ -51,7 +51,12 @@ pip install -e .
 ticker
 ```
 
-The output should be: `Successfully installed your project file: ticker`
+If all went well, you should be seeing a ticker strip near the bottom of your screen.
+
+## Configuring
+
+Edit the `portfolio.json` file to add or remove stocks and cryptocurrencies.
+As of this version, you must have at least one of each.
 
 ## Contributing
 

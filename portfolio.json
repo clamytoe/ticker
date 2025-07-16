@@ -1,0 +1,29 @@
+{
+    "stocks": [
+        "ALAB",
+        "ALZN",
+        "AMD",
+        "ELF",
+        "HNST",
+        "INTC",
+        "MSTR",
+        "MSTX",
+        "NVDA",
+        "NVDL",
+        "PLTR",
+        "SLXN",
+        "SOFI",
+        "SOUN",
+        "SWIN",
+        "VERB",
+        "VST"
+    ],
+    "crypto_keymap": {
+        "bitcoin": "BTC",
+        "ethereum": "ETH",
+        "ripple": "XRP",
+        "stellar": "XLM",
+        "hedera": "HBAR",
+        "shiba-inu": "SHIB"
+    }
+}

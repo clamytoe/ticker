@@ -91,7 +91,7 @@ class TickerPanel(wx.Panel):
         xoff += dc.GetTextExtent(arrow)[0] + 3
         dc.DrawText(f"{chg:+.2f}", xoff, 40)
         xoff += dc.GetTextExtent(f"{chg:+.2f}")[0] + 5
-        dc.DrawText(f"({perc:+.2f}%)", xoff, 40)
+        dc.DrawText(f"[{perc:+.2f}%]", xoff, 40)
         del dc
         return bmp
 

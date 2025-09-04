@@ -11,8 +11,9 @@ class MainFrame(wx.Frame):
         style = wx.STAY_ON_TOP | wx.BORDER_NONE
         height = 120
         super().__init__(None, title="Stock & Crypto Ticker", style=style)  # FIXED
-        self.SetSize((wx.DisplaySize()[0], height))  # type: ignore
-        self.SetPosition((0, wx.DisplaySize()[1] - height))  # type: ignore
+        geometry = self.get_display_geometry()
+        self.SetSize(wx.Size(geometry.width, height))
+        self.SetPosition(wx.Point(geometry.x, geometry.y))
 
         panel = wx.Panel(self)
         self.ticker = TickerPanel(panel, stock_data)
@@ -27,6 +28,14 @@ class MainFrame(wx.Frame):
         self.refresh_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_refresh_timer, self.refresh_timer)
         self.refresh_timer.Start(60000)  # 60,000 ms = 1 minute
+        self.SetWindowStyleFlag(wx.STAY_ON_TOP | wx.BORDER_NONE)
+        self.Raise()
+
+    @staticmethod
+    def get_display_geometry(index: int = 0) -> wx.Rect:
+        if wx.Display.GetCount() == 0:
+            return wx.Rect(0, 0, 800, 600)
+        return wx.Display(index).GetGeometry()
 
     def on_hotkey(self, event):
         keycode = event.GetKeyCode()

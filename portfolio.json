@@ -15,15 +15,16 @@
         "SOFI",
         "SOUN",
         "SWIN",
-        "VERB",
+        "TONX",
         "VST"
     ],
     "crypto_keymap": {
         "bitcoin": "BTC",
         "ethereum": "ETH",
+        "hedera": "HBAR",
         "ripple": "XRP",
         "stellar": "XLM",
-        "hedera": "HBAR",
-        "shiba-inu": "SHIB"
+        "shiba-inu": "SHIB",
+        "world-liberty-financial": "WLFI"
     }
 }

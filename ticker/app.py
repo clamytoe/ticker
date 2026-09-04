@@ -2,6 +2,7 @@
 import asyncio
 
 import wx
+from curl_cffi import curl
 
 from ticker.data import gather_all_data_async
 from ticker.main_frame import MainFrame
@@ -15,4 +16,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except curl.CurlError as e:
+        print(e)

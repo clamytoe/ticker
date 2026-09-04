@@ -1,11 +1,11 @@
 import pytest
 
-from ticker.data import gather_all_data_async
+from src.ticker.data import gather_all_data_async
 
 
 @pytest.mark.asyncio
 async def test_async_get_stock_info(monkeypatch):
-    from ticker.data import async_get_stock_info
+    from src.ticker.data import async_get_stock_info
 
     def fake_get_stock_info(ticker):
         return {"symbol": ticker, "price": 100}
@@ -18,7 +18,7 @@ async def test_async_get_stock_info(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_async_get_crypto_info(monkeypatch):
-    from ticker.data import async_get_crypto_info
+    from src.ticker.data import async_get_crypto_info
 
     def fake_get_crypto_info(ids):
         return {"BTC": {"symbol": "BTC", "price": 50000}}

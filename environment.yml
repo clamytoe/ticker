@@ -2,15 +2,5 @@ name: ticker
 channels:
   - conda-forge
 dependencies:
-  - black
-  - curl-cffi
-  - flake8
-  - isort
-  - mypy
-  - pycoingecko
-  - pytest
-  - pytest-cov
   - python=3.13.3
-  - python-dotenv
   - wxpython
-  - yfinance

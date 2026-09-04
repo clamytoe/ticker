@@ -3,7 +3,7 @@ import os
 import pytest
 import wx
 
-from ticker.main_frame import MainFrame
+from src.ticker.main_frame import MainFrame
 
 
 @pytest.mark.skipif("DISPLAY" not in os.environ, reason="Requires X server")
@@ -18,7 +18,7 @@ def test_main_frame_creation():
 def test_on_hotkey_closes(monkeypatch):
     import wx
 
-    from ticker.main_frame import MainFrame
+    from src.ticker.main_frame import MainFrame
 
     app = wx.App(False)
     frame = MainFrame({})

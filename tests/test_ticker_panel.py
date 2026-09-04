@@ -1,6 +1,6 @@
 import wx
 
-from ticker.ticker_panel import TickerPanel
+from src.ticker.ticker_panel import TickerPanel
 
 
 def test_prepare_ticker_items():

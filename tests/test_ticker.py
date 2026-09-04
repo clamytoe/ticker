@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import wx
 
-from ticker.crypto import get_crypto_info
+from src.ticker.crypto import get_crypto_info
 
 
 @patch("ticker.crypto.cg.get_coins_markets")
@@ -42,6 +42,6 @@ def test_main_runs(monkeypatch):
             pass
 
     monkeypatch.setattr("ticker.app.wx.App", lambda x: DummyApp())
-    from ticker.app import main
+    from src.ticker.app import main
 
     main()

@@ -1,4 +1,4 @@
-from ticker.stock import get_stock_info
+from src.ticker.stock import get_stock_info
 
 
 def test_get_stock_info_returns_dict():

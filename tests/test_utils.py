@@ -1,6 +1,6 @@
 import os
 
-from ticker.utils import fetch_logo
+from src.ticker.utils import fetch_logo
 
 
 def test_fetch_logo_bad_url(tmp_path):

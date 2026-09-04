@@ -1,0 +1,41 @@
+[project]
+name = "ticker"
+version = "0.2.0"
+description = "A stock ticker strip that supports both stocks and cryptocurrencies."
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+license = { text = "MIT" }
+
+authors = [
+    { name = "Martin Uribe", email = "your-email@example.com" }
+]
+
+dependencies = [
+    "curl-cffi",
+    "pycoingecko",
+    "python-dotenv",
+    "yfinance",
+]
+
+[project.scripts]
+ticker = "ticker.app:main"
+
+[dependency-groups]
+dev = [
+    "black",
+    "flake8",
+    "isort",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.uv]
+package = true

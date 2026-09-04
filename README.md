@@ -24,24 +24,8 @@ cd ticker
 If you are an Anaconda user, this command will get you up to speed with the base installation.
 
 ```zsh
-conda env create
+conda env create -f environment.yml
 conda activate ticker
-```
-
-### Regular Python setup
-
-If you are just using normal Python, this will get you ready, but I highly recommend that you do this in a virtual environment.
-There are many ways to do this, the simplest using *venv*.
-
-```zsh
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### Final setup
-
-```zsh
 pip install -e .
 ```
 
@@ -51,7 +35,7 @@ pip install -e .
 ticker
 ```
 
-If all went well, you should be seeing a ticker strip near the bottom of your screen.
+If all went well, you should be seeing a ticker strip at the top of your screen.
 
 ![ticker_ribbon](images/ticker_ribbon.png)
 
@@ -100,10 +84,11 @@ If you encounter any problems, please [file an issue](https://github.com/clamyto
 
 ## Changelog
 
+* **v0.2.0** Ported to use pyproject.toml
 * **v0.1.0** Initial commit.
 
 [python-version]:https://img.shields.io/badge/python-3.13.3-brightgreen.svg
-[latest-version]:https://img.shields.io/badge/version-0.1.0-blue.svg
+[latest-version]:https://img.shields.io/badge/version-0.2.0-blue.svg
 [issues-image]:https://img.shields.io/github/issues/clamytoe/ticker.svg
 [issues-url]:https://github.com/clamytoe/ticker/issues
 [fork-image]:https://img.shields.io/github/forks/clamytoe/ticker.svg

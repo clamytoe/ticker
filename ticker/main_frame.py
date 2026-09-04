@@ -11,7 +11,7 @@ class MainFrame(wx.Frame):
         style = wx.STAY_ON_TOP | wx.BORDER_NONE
         height = 120
         super().__init__(None, title="Stock & Crypto Ticker", style=style)  # FIXED
-        geometry = self.get_display_geometry()
+        geometry = self.get_leftmost_display_geometry()
         self.SetSize(wx.Size(geometry.width, height))
         self.SetPosition(wx.Point(geometry.x, geometry.y))
 
@@ -32,10 +32,30 @@ class MainFrame(wx.Frame):
         self.Raise()
 
     @staticmethod
+    def get_leftmost_display_geometry() -> wx.Rect:
+        count = wx.Display.GetCount()
+        leftmost = wx.Display(0).GetGeometry()
+        min_y = float("inf")
+        for i in range(1, count):
+            geo = wx.Display(i).GetGeometry()
+            total_width = leftmost.width
+            if geo.x < leftmost.x:
+                leftmost = geo
+            if geo.x > leftmost.x:
+                total_width = leftmost.width
+        min_y = min(min_y, leftmost.y)
+        return wx.Rect(0, int(min_y), total_width, 120)
+
+    @staticmethod
     def get_display_geometry(index: int = 0) -> wx.Rect:
-        if wx.Display.GetCount() == 0:
-            return wx.Rect(0, 0, 800, 600)
-        return wx.Display(index).GetGeometry()
+        count = wx.Display.GetCount()
+        total_width = 0
+        min_y = float("inf")
+        for i in range(count):
+            geo = wx.Display(i).GetGeometry()
+            total_width += geo.width
+            min_y = min(min_y, geo.y)
+        return wx.Rect(0, int(min_y), total_width, 120)  # height is ticker height
 
     def on_hotkey(self, event):
         keycode = event.GetKeyCode()
